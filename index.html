@@ -42,9 +42,9 @@
   else { frame.onload = hideSplash; frame.src = APP_URL; setTimeout(hideSplash, 8000); }
   window.addEventListener("online", function(){ location.reload(); });
 
-  // زر الرجوع في الجوال: يبقى داخل التطبيق بدل الخروج وإعادة الدخول
-  // زر الرجوع لا يخرجك أبداً ولا يعيدك للتسجيل؛ الخروج فقط من زر الخروج داخل التطبيق أو زر الصفحة الرئيسية للجوال
-  var toastTimer;
+  // زر الرجوع في الجوال: يرجعك للصفحة السابقة داخل التطبيق، ولا يخرجك ولا يعيدك للتسجيل
+  // الخروج فقط من زر "خروج" داخل التطبيق أو بإغلاق التطبيق من الجوال
+  var toastTimer, backDone = false, myLen = 0;
   function showToast(t){ var el = document.getElementById("toast"); el.textContent = t; el.style.display = "block";
     clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.style.display = "none"; }, 2000); }
   function sendBack(w, depth){ // يرسل أمر "رجوع" لكل الإطارات الداخلية لصفحة Apps Script
@@ -52,11 +52,18 @@
     if (depth > 4) return;
     try { for (var i = 0; i < w.length; i++) sendBack(w[i], depth + 1); } catch(e){}
   }
-  try { history.replaceState({les:0}, ""); history.pushState({les:1}, ""); } catch(e){}
+  // "حاجز" في سجل الصفحات: يبقى دائماً آخر خطوة، فزر الرجوع يصطدم به هو لا بصفحة الدخول
+  function arm(){ try { history.pushState({les:1}, ""); myLen = history.length; } catch(e){} }
+  try { history.replaceState({les:0}, ""); } catch(e){}
+  arm();
+  // إذا أضاف التطبيق خطوات جديدة للسجل (مثل بعد تسجيل الدخول) نعيد الحاجز ليكون آخر خطوة
+  setInterval(function(){ if (history.length !== myLen) arm(); }, 700);
+  window.addEventListener("message", function(e){ if (e.data === "les-back-done") backDone = true; });
   window.addEventListener("popstate", function(){
-    try { history.pushState({les:1}, ""); } catch(e){}
+    arm();
+    backDone = false;
     sendBack(frame.contentWindow, 0);
-    showToast("أنت في نفس الصفحة ✔");
+    setTimeout(function(){ if (!backDone) showToast("للخروج اضغط زر خروج داخل التطبيق"); }, 450);
   });
 
   if ("serviceWorker" in navigator) {
