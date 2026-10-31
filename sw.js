@@ -1,5 +1,5 @@
 // Service worker: يحفظ ملفات واجهة التطبيق ليفتح بسرعة
-var CACHE = "english-stars-v1";
+var CACHE = "english-stars-v2";
 var FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "maskable-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", function (e) {
