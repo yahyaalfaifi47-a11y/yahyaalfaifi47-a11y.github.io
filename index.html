@@ -60,6 +60,7 @@
   // إذا أضاف التطبيق خطوات جديدة للسجل (مثل بعد تسجيل الدخول) نعيد الحاجز ليكون آخر خطوة
   setInterval(function(){ if (history.length !== myLen) arm(); }, 700);
   window.addEventListener("message", function(e){ if (e.data === "les-back-done") backDone = true; });
+  window.addEventListener("message", function(e){ if (e.data === "les-refresh") location.reload(); });
   window.addEventListener("popstate", function(){
     arm();
     backDone = false;
